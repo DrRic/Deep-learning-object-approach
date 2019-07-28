@@ -23,13 +23,23 @@
 #  
 
 class Weight:
+    learning_rate = 0.1
     def __init__ (self,weight):
         self.node_from = None
         self.node_to = None
         self.weight = weight
+        self.delta = 0
 
     def output(self):
         return self.node_from.output * self.weight
+        
+    def calc_delta(self):
+        self.delta = self.node_to.delta*self.node_from.output
+    
+    def update(self):
+        self.calc_delta()
+        self.weight-=Weight.learning_rate*self.delta
+        
 
 
 class Node:
@@ -39,6 +49,7 @@ class Node:
         self.value = 0.0
         self.output = 0.0
         self.error = 0.0
+        self.delta = 0.0
         self.function = function
         self.derivitive = derivitive
 
@@ -59,9 +70,9 @@ class Node:
         weight.node_from = self
 
 class NodeIn:
-    def __init__ (self,value):
+    def __init__ (self,output):
         self.weights_out=[]
-        self.output = value
+        self.output = output
 
 
     def add_weight_out(self,weight):
@@ -92,10 +103,20 @@ def test2():
     for i in range(len(weights_0)):
         layer_0[i].add_weight_out(weights_0[i])
         output_layer[0].add_weight_in(weights_0[i])
-    output_layer[0].feed_foward()
-    print(output_layer[0].output)
-    
-    
+    for _ in range(1):
+        for i in range(len(y)):
+            for n in range(len(layer_0)):
+                layer_0[n].output = X[i][n]
+            output_layer[0].feed_foward()
+            print("output :",output_layer[0].output)
+            output_layer[0].delta = y[i]-output_layer[0].output
+            print("delta  :",output_layer[0].delta )
+            Weight.learning_rate = 0.01
+            for w in weights_0:
+                w.update()
+                print(w.weight,end="  ")
+            print()
+            print()
     
 def main(args):
     test2()
